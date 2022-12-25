@@ -2403,11 +2403,13 @@ namespace MsgReader
                             {
                                 Logger.WriteToLog("Attachment is inline, found by content id");
                                 body = body.Replace($"cid:{attach.ContentId}", fileInfo.Name);
+                                attach.IsInline = true;
                             }
                             else if (body.Contains($"cid:{attach.FileName}"))
                             {
                                 Logger.WriteToLog("Attachment is inline, found by filename");
                                 body = body.Replace("cid:" + attach.FileName, fileInfo.Name);
+                                attach.IsInline = true;
                             }
                             else
                             {
