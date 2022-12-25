@@ -519,6 +519,12 @@ namespace MsgReader.Outlook
 
             #endregion
 
+            /// <summary>
+            /// Gets or sets a value indicating whether email addresses will be displayed
+            /// with the full name.
+            /// </summary>
+            public static bool UseDisplayNameAndEmailAddresses { get; set; }
+
             #region Properties
             /// <summary>
             /// Returns the ID of the message when the MSG file has been sent across the internet 
@@ -2110,24 +2116,57 @@ namespace MsgReader.Outlook
                     representingDisplayName = WebUtility.HtmlEncode(representingDisplayName);
                 }
 
+                string formattedAddress;
+                string formattedRepAddress;
+
+                // If we are to use display names and email addresses
+                if (UseDisplayNameAndEmailAddresses)
+                {
+                    string fullAddress = FormatNameAndEmailAddress(displayName, emailAddress, html);
+                    string fullRepAddress = FormatNameAndEmailAddress(representingDisplayName, representingEmailAddress, html);
+                    formattedAddress = fullAddress;
+                    formattedRepAddress = fullRepAddress;
+                }
+                else
+                {
+                    formattedAddress = !string.IsNullOrEmpty(displayName) ? displayName : emailAddress;
+                    formattedRepAddress = !string.IsNullOrEmpty(representingDisplayName) ? representingDisplayName : representingEmailAddress;
+                }
+
                 // If we want hyperlinks and the outputformat is html and the email address is set
                 if (convertToHref && html && 
                     !string.IsNullOrEmpty(emailAddress))
                 {
-                    output += "<a href=\"mailto:" + emailAddress + "\">" +
-                                (!string.IsNullOrEmpty(displayName)
-                                    ? displayName
-                                    : emailAddress) + "</a>";
+                    if (UseDisplayNameAndEmailAddresses)
+                    {
+                        output += "<a href=\"mailto:" + emailAddress + "\">" +
+                            formattedAddress + "</a>";
+                    }
+                    else
+                    {
+                        output += "<a href=\"mailto:" + emailAddress + "\">" +
+                                    (!string.IsNullOrEmpty(displayName)
+                                        ? displayName
+                                        : emailAddress) + "</a>";
+                    }
 
                     if (!string.IsNullOrEmpty(representingEmailAddress) && 
                         !string.IsNullOrEmpty(emailAddress) &&
                         !emailAddress.Equals(representingEmailAddress, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        output += " " + LanguageConsts.EmailOnBehalfOf + " <a href=\"mailto:" + representingEmailAddress +
-                                    "\">" +
-                                    (!string.IsNullOrEmpty(representingDisplayName)
-                                        ? representingDisplayName
-                                        : representingEmailAddress) + "</a> ";
+                        if (UseDisplayNameAndEmailAddresses)
+                        {
+                            output += " " + LanguageConsts.EmailOnBehalfOf + " <a href=\"mailto:" + representingEmailAddress +
+                                "\">" + formattedRepAddress + "</a> ";
+                        }
+                        else
+                        {
+                            output += " " + LanguageConsts.EmailOnBehalfOf + " <a href=\"mailto:" + representingEmailAddress +
+                                        "\">" +
+                                        (!string.IsNullOrEmpty(representingDisplayName)
+                                            ? representingDisplayName
+                                            : representingEmailAddress) + "</a> ";
+                        }
                     }
                 }
                 else
@@ -2262,6 +2301,42 @@ namespace MsgReader.Outlook
             }
 
             /// <summary>
+            /// Formats a user's display name and email address for an Outlook message header. 
+            /// </summary>
+            /// <param name="displayName">The display name of the user.</param>
+            /// <param name="emailAddress">The email address of the user.</param>
+            /// <param name="isHtml">Indicates whether to format for HTML.</param>
+            /// <returns>The formatted string.</returns>
+            public string FormatNameAndEmailAddress(string displayName, string emailAddress, bool isHtml)
+            {
+                string output = "";
+
+                if (!string.IsNullOrEmpty(displayName))
+                    output += displayName;
+
+                var beginTag = string.Empty;
+                var endTag = string.Empty;
+                if (!string.IsNullOrEmpty(displayName))
+                {
+                    if (isHtml)
+                    {
+                        beginTag = "&nbsp;&lt;";
+                        endTag = "&gt;";
+                    }
+                    else
+                    {
+                        beginTag = " <";
+                        endTag = ">";
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(emailAddress))
+                    output += beginTag + emailAddress + endTag;
+
+                return output;
+            }
+
+            /// <summary>
             /// Returns the E-mail recipients in a human readable format
             /// </summary>
             /// <param name="type">Selects the Recipient type to retrieve</param>
@@ -2289,7 +2364,23 @@ namespace MsgReader.Outlook
                     var emailAddress = recipient.Email;
                     var displayName = recipient.DisplayName;
 
-                    if (convertToHref && html && !string.IsNullOrEmpty(emailAddress))
+                    string fullAddress = FormatNameAndEmailAddress(displayName, emailAddress, html);
+
+                    string formattedAddress;
+
+                    if (UseDisplayNameAndEmailAddresses)
+                    {
+                        formattedAddress = fullAddress;
+                    }
+                    else
+                    {
+                        formattedAddress = !string.IsNullOrEmpty(displayName) ? displayName : emailAddress;
+                    }
+
+                    if (UseDisplayNameAndEmailAddresses && convertToHref && html && !string.IsNullOrEmpty(emailAddress))
+                        output += "<a href=\"mailto:" + emailAddress + "\">" +
+                        formattedAddress + "</a>";
+                    else if (!UseDisplayNameAndEmailAddresses && convertToHref && html && !string.IsNullOrEmpty(emailAddress))
                         output += "<a href=\"mailto:" + emailAddress + "\">" +
                                     (!string.IsNullOrEmpty(displayName)
                                         ? displayName
