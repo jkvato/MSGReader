@@ -156,6 +156,12 @@ namespace MsgReader
         }
         #endregion
 
+        /// <summary>
+        /// Gets or sets a value to determine whether to force a <c>&lt;div class="WordSection1"&gt;</c>
+        /// in the header.
+        /// </summary>
+        public static bool InjectWordSection1DivInHeader { get; set; }
+
         #region HeaderStyle
         /// <summary>
         /// Set the custom CSS stylesheet for the email header.
@@ -812,6 +818,11 @@ namespace MsgReader
             if (!htmlBody)
                 return;
 
+            if (InjectWordSection1DivInHeader)
+            {
+                header.AppendLine("<div class=\"WordSection1\">");
+            }
+
             if (UseCustomHeaderStyle)
             {
                 header.AppendLine("<style>" + GetCustomHeaderStyle() + "</style>");
@@ -960,6 +971,11 @@ namespace MsgReader
         private static void WriteHeaderEnd(StringBuilder header, bool htmlBody)
         {
             header.AppendLine(!htmlBody ? string.Empty : "</table><br/>");
+
+            if (InjectWordSection1DivInHeader)
+            {
+                header.AppendLine("</div>");
+            }
         }
         #endregion
 
