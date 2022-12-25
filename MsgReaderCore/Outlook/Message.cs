@@ -1015,7 +1015,7 @@ namespace MsgReader.Outlook
 
                     var text = string.Empty;
 
-                    if (_bodyHtml != null)
+                    if (BodyHtml != null)
                     {
                         // Force the loading of the HTML
                         text = BodyHtml;
