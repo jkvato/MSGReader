@@ -3618,6 +3618,12 @@
             The transport message headers
             </summary>
         </member>
+        <member name="P:MsgReader.Outlook.Storage.Message.UseDisplayNameAndEmailAddresses">
+            <summary>
+            Gets or sets a value indicating whether email addresses will be displayed
+            with the full name.
+            </summary>
+        </member>
         <member name="P:MsgReader.Outlook.Storage.Message.Id">
             <summary>
             Returns the ID of the message when the MSG file has been sent across the internet 
@@ -3986,6 +3992,15 @@
             </summary>
             <param name="type">Selects the Recipient type to retrieve</param>
             <returns></returns>
+        </member>
+        <member name="M:MsgReader.Outlook.Storage.Message.FormatNameAndEmailAddress(System.String,System.String,System.Boolean)">
+            <summary>
+            Formats a user's display name and email address for an Outlook message header. 
+            </summary>
+            <param name="displayName">The display name of the user.</param>
+            <param name="emailAddress">The email address of the user.</param>
+            <param name="isHtml">Indicates whether to format for HTML.</param>
+            <returns>The formatted string.</returns>
         </member>
         <member name="M:MsgReader.Outlook.Storage.Message.GetEmailRecipients(MsgReader.Outlook.RecipientType,System.Boolean,System.Boolean)">
             <summary>
@@ -6171,6 +6186,12 @@
         <member name="P:MsgReader.Reader.InjectHeaderAsIFrame">
             <summary>
             If true the header is injected as an iframe effectively ensuring it is not affected by any css in the message
+            </summary>
+        </member>
+        <member name="P:MsgReader.Reader.InjectWordSection1DivInHeader">
+            <summary>
+            Gets or sets a value to determine whether to force a <c>&lt;div class="WordSection1"&gt;</c>
+            in the header.
             </summary>
         </member>
         <member name="M:MsgReader.Reader.SetCustomHeaderStyle(System.String)">
