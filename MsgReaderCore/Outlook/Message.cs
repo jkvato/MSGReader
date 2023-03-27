@@ -519,11 +519,13 @@ namespace MsgReader.Outlook
 
             #endregion
 
+            // ##### Begin HDS
             /// <summary>
             /// Gets or sets a value indicating whether email addresses will be displayed
             /// with the full name.
             /// </summary>
             public static bool UseDisplayNameAndEmailAddresses { get; set; }
+            // ##### End HDS
 
             #region Properties
             /// <summary>
@@ -1015,7 +1017,10 @@ namespace MsgReader.Outlook
 
                     var text = string.Empty;
 
+                    // ##### Begin HDS
+                    //if (_bodyHtml != null)
                     if (BodyHtml != null)
+                    // ##### End HDS
                     {
                         // Force the loading of the HTML
                         text = BodyHtml;
@@ -2116,6 +2121,7 @@ namespace MsgReader.Outlook
                     representingDisplayName = WebUtility.HtmlEncode(representingDisplayName);
                 }
 
+                // ##### Begin HDS
                 string formattedAddress;
                 string formattedRepAddress;
 
@@ -2132,11 +2138,17 @@ namespace MsgReader.Outlook
                     formattedAddress = !string.IsNullOrEmpty(displayName) ? displayName : emailAddress;
                     formattedRepAddress = !string.IsNullOrEmpty(representingDisplayName) ? representingDisplayName : representingEmailAddress;
                 }
+                // ##### End HDS
 
                 // If we want hyperlinks and the outputformat is html and the email address is set
                 if (convertToHref && html && 
                     !string.IsNullOrEmpty(emailAddress))
                 {
+                    // ##### Begin HDS
+                    //output += "<a href=\"mailto:" + emailAddress + "\">" +
+                    //            (!string.IsNullOrEmpty(displayName)
+                    //                ? displayName
+                    //                : emailAddress) + "</a>";
                     if (UseDisplayNameAndEmailAddresses)
                     {
                         output += "<a href=\"mailto:" + emailAddress + "\">" +
@@ -2149,11 +2161,18 @@ namespace MsgReader.Outlook
                                         ? displayName
                                         : emailAddress) + "</a>";
                     }
+                    // ##### End HDS
 
                     if (!string.IsNullOrEmpty(representingEmailAddress) && 
                         !string.IsNullOrEmpty(emailAddress) &&
                         !emailAddress.Equals(representingEmailAddress, StringComparison.InvariantCultureIgnoreCase))
                     {
+                        // ##### Begin HDS
+                        //output += " " + LanguageConsts.EmailOnBehalfOf + " <a href=\"mailto:" + representingEmailAddress +
+                        //    "\">" +
+                        //    (!string.IsNullOrEmpty(representingDisplayName)
+                        //        ? representingDisplayName
+                        //        : representingEmailAddress) + "</a> ";
                         if (UseDisplayNameAndEmailAddresses)
                         {
                             output += " " + LanguageConsts.EmailOnBehalfOf + " <a href=\"mailto:" + representingEmailAddress +
@@ -2167,6 +2186,7 @@ namespace MsgReader.Outlook
                                             ? representingDisplayName
                                             : representingEmailAddress) + "</a> ";
                         }
+                        // ##### End HDS
                     }
                 }
                 else
@@ -2300,6 +2320,7 @@ namespace MsgReader.Outlook
                 return output;
             }
 
+            // ##### Begin HDS
             /// <summary>
             /// Formats a user's display name and email address for an Outlook message header. 
             /// </summary>
@@ -2335,6 +2356,7 @@ namespace MsgReader.Outlook
 
                 return output;
             }
+            // ##### End HDS
 
             /// <summary>
             /// Returns the E-mail recipients in a human readable format
@@ -2364,6 +2386,8 @@ namespace MsgReader.Outlook
                     var emailAddress = recipient.Email;
                     var displayName = recipient.DisplayName;
 
+                    // ##### Begin HDS
+                    //if (convertToHref && html && !string.IsNullOrEmpty(emailAddress))
                     string fullAddress = FormatNameAndEmailAddress(displayName, emailAddress, html);
 
                     string formattedAddress;
@@ -2381,6 +2405,7 @@ namespace MsgReader.Outlook
                         output += "<a href=\"mailto:" + emailAddress + "\">" +
                         formattedAddress + "</a>";
                     else if (!UseDisplayNameAndEmailAddresses && convertToHref && html && !string.IsNullOrEmpty(emailAddress))
+                    // ##### Begin HDS
                         output += "<a href=\"mailto:" + emailAddress + "\">" +
                                     (!string.IsNullOrEmpty(displayName)
                                         ? displayName

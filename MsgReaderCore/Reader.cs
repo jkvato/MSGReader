@@ -156,11 +156,13 @@ namespace MsgReader
         }
         #endregion
 
+        // ##### Begin HDS
         /// <summary>
         /// Gets or sets a value to determine whether to force a <c>&lt;div class="WordSection1"&gt;</c>
         /// in the header.
         /// </summary>
         public static bool InjectWordSection1DivInHeader { get; set; }
+        // ##### End HDS
 
         #region HeaderStyle
         /// <summary>
@@ -818,10 +820,12 @@ namespace MsgReader
             if (!htmlBody)
                 return;
 
+            // ##### Begin HDS
             if (InjectWordSection1DivInHeader)
             {
                 header.AppendLine("<div class=\"WordSection1\">");
             }
+            // ##### End HDS
 
             if (UseCustomHeaderStyle)
             {
@@ -972,10 +976,12 @@ namespace MsgReader
         {
             header.AppendLine(!htmlBody ? string.Empty : "</table><br/>");
 
+            // ##### Begin HDS
             if (InjectWordSection1DivInHeader)
             {
                 header.AppendLine("</div>");
             }
+            // ##### End HDS
         }
         #endregion
 
@@ -2403,13 +2409,17 @@ namespace MsgReader
                             {
                                 Logger.WriteToLog("Attachment is inline, found by content id");
                                 body = body.Replace($"cid:{attach.ContentId}", fileInfo.Name);
+                                // ##### Begin HDS
                                 attach.IsInline = true;
+                                // ##### End HDS
                             }
                             else if (body.Contains($"cid:{attach.FileName}"))
                             {
                                 Logger.WriteToLog("Attachment is inline, found by filename");
                                 body = body.Replace("cid:" + attach.FileName, fileInfo.Name);
+                                // ##### Begin HDS
                                 attach.IsInline = true;
+                                // ##### End HDS
                             }
                             else
                             {
