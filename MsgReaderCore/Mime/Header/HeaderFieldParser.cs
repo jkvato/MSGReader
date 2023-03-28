@@ -6,290 +6,292 @@ using System.Net.Mime;
 using MsgReader.Helpers;
 using MsgReader.Mime.Decode;
 
-namespace MsgReader.Mime.Header
+namespace MsgReader.Mime.Header;
+
+/// <summary>
+///     Class that can parse different fields in the header sections of a MIME message.
+/// </summary>
+internal static class HeaderFieldParser
 {
-	/// <summary>
-	/// Class that can parse different fields in the header sections of a MIME message.
-	/// </summary>
-	internal static class HeaderFieldParser
+    #region ParseContentTransferEncoding
+    /// <summary>
+    ///     Parses the Content-Transfer-Encoding header.
+    /// </summary>
+    /// <param name="headerValue">The value for the header to be parsed</param>
+    /// <returns>A <see cref="ContentTransferEncoding" /></returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="headerValue" /> is <see langword="null" /></exception>
+    /// <exception cref="ArgumentException">
+    ///     If the <paramref name="headerValue" /> could not be parsed to a
+    ///     <see cref="ContentTransferEncoding" />
+    /// </exception>
+    public static ContentTransferEncoding ParseContentTransferEncoding(string headerValue)
     {
-        #region ParseContentTransferEncoding
-        /// <summary>
-	    /// Parses the Content-Transfer-Encoding header.
-	    /// </summary>
-	    /// <param name="headerValue">The value for the header to be parsed</param>
-	    /// <returns>A <see cref="ContentTransferEncoding"/></returns>
-	    /// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
-	    /// <exception cref="ArgumentException">If the <paramref name="headerValue"/> could not be parsed to a <see cref="ContentTransferEncoding"/></exception>
-	    public static ContentTransferEncoding ParseContentTransferEncoding(string headerValue)
-	    {
-	        if (headerValue == null)
-	            throw new ArgumentNullException(nameof(headerValue));
+        if (headerValue == null)
+            throw new ArgumentNullException(nameof(headerValue));
 
-	        switch (headerValue.Trim().ToUpperInvariant())
-	        {
-	            case "7BIT":
-	                return ContentTransferEncoding.SevenBit;
+        switch (headerValue.Trim().ToUpperInvariant())
+        {
+            case "7BIT":
+                return ContentTransferEncoding.SevenBit;
 
-	            case "8BIT":
-	                return ContentTransferEncoding.EightBit;
+            case "8BIT":
+                return ContentTransferEncoding.EightBit;
 
-	            case "QUOTED-PRINTABLE":
-	                return ContentTransferEncoding.QuotedPrintable;
+            case "QUOTED-PRINTABLE":
+                return ContentTransferEncoding.QuotedPrintable;
 
-	            case "BASE64":
-	                return ContentTransferEncoding.Base64;
+            case "BASE64":
+                return ContentTransferEncoding.Base64;
 
-	            case "BINARY":
-	                return ContentTransferEncoding.Binary;
-					
-				 case "UUENCODE":
-                    return ContentTransferEncoding.UUEncode;
+            case "BINARY":
+                return ContentTransferEncoding.Binary;
 
-	                // If a wrong argument is passed to this parser method, then we assume
-	                // default encoding, which is SevenBit.
-	                // This is to ensure that we do not throw exceptions, even if the email not MIME valid.
-	            default:
-	                return ContentTransferEncoding.SevenBit;
-	        }
-	    }
-	    #endregion
+            case "UUENCODE":
+                return ContentTransferEncoding.UUEncode;
 
-        #region ParseImportance
-        /// <summary>
-	    /// Parses an ImportanceType from a given Importance header value.
-	    /// </summary>
-	    /// <param name="headerValue">The value to be parsed</param>
-	    /// <returns>A <see cref="MailPriority"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
-	    /// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
-	    public static MailPriority ParseImportance(string headerValue)
-	    {
-	        if (headerValue == null)
-	            throw new ArgumentNullException(nameof(headerValue));
+            // If a wrong argument is passed to this parser method, then we assume
+            // default encoding, which is SevenBit.
+            // This is to ensure that we do not throw exceptions, even if the email not MIME valid.
+            default:
+                return ContentTransferEncoding.SevenBit;
+        }
+    }
+    #endregion
 
-	        switch (headerValue.ToUpperInvariant())
-	        {
-	            case "5":
-	            case "HIGH":
-	                return MailPriority.High;
+    #region ParseImportance
+    /// <summary>
+    ///     Parses an ImportanceType from a given Importance header value.
+    /// </summary>
+    /// <param name="headerValue">The value to be parsed</param>
+    /// <returns>A <see cref="MailPriority" />. If the <paramref name="headerValue" /> is not recognized, Normal is returned.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="headerValue" /> is <see langword="null" /></exception>
+    public static MailPriority ParseImportance(string headerValue)
+    {
+        if (headerValue == null)
+            throw new ArgumentNullException(nameof(headerValue));
 
-	            case "3":
-	            case "NORMAL":
-	                return MailPriority.Normal;
+        switch (headerValue.ToUpperInvariant())
+        {
+            case "5":
+            case "HIGH":
+                return MailPriority.High;
 
-	            case "1":
-	            case "LOW":
-	                return MailPriority.Low;
+            case "3":
+            case "NORMAL":
+                return MailPriority.Normal;
 
-	            default:
-	                return MailPriority.Normal;
-	        }
-	    }
-	    #endregion
+            case "1":
+            case "LOW":
+                return MailPriority.Low;
 
-        #region ParseContentType
-        /// <summary>
-	    /// Parses a the value for the header Content-Type to 
-	    /// a <see cref="ContentType"/> object.
-	    /// </summary>
-	    /// <param name="headerValue">The value to be parsed</param>
-	    /// <returns>A <see cref="ContentType"/> object</returns>
-	    /// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
-	    public static ContentType ParseContentType(string headerValue)
-	    {
-	        if (headerValue == null)
-	            throw new ArgumentNullException(nameof(headerValue));
+            default:
+                return MailPriority.Normal;
+        }
+    }
+    #endregion
 
-	        // We create an empty Content-Type which we will fill in when we see the values
-	        var contentType = new ContentType();
+    #region ParseContentType
+    /// <summary>
+    ///     Parses a the value for the header Content-Type to
+    ///     a <see cref="ContentType" /> object.
+    /// </summary>
+    /// <param name="headerValue">The value to be parsed</param>
+    /// <returns>A <see cref="ContentType" /> object</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="headerValue" /> is <see langword="null" /></exception>
+    public static ContentType ParseContentType(string headerValue)
+    {
+        if (headerValue == null)
+            throw new ArgumentNullException(nameof(headerValue));
 
-	        // Now decode the parameters
-	        var parameters = Rfc2231Decoder.Decode(headerValue);
+        // We create an empty Content-Type which we will fill in when we see the values
+        var contentType = new ContentType();
 
-            var isMediaTypeProcessed = false;
-            foreach (var keyValuePair in parameters)
-	        {
-	            var key = keyValuePair.Key.ToUpperInvariant().Trim();
-	            var value = Utility.RemoveQuotesIfAny(keyValuePair.Value.Trim());
-                value = value.TrimStart('/');
-                value = value.TrimStart('\\');
+        // Now decode the parameters
+        var parameters = Rfc2231Decoder.Decode(headerValue);
 
-	            switch (key)
-	            {
-	                case "":
-                        // This is the MediaType - it has no key since it is the first one mentioned in the
-                        // headerValue and has no = in it.
+        var isMediaTypeProcessed = false;
+        foreach (var keyValuePair in parameters)
+        {
+            var key = keyValuePair.Key.ToUpperInvariant().Trim();
+            var value = Utility.RemoveQuotesIfAny(keyValuePair.Value.Trim());
+            value = value.TrimStart('/');
+            value = value.TrimStart('\\');
 
-                        if (!isMediaTypeProcessed)
+            switch (key)
+            {
+                case "":
+                    // This is the MediaType - it has no key since it is the first one mentioned in the
+                    // headerValue and has no = in it.
+
+                    if (!isMediaTypeProcessed)
+                    {
+                        // Check for illegal content-type 
+                        var v = value.ToUpperInvariant().Trim('\0');
+                        if (v.Equals("TEXT") || v.Equals("TEXT/"))
+                            value = "text/plain";
+
+                        try
                         {
-                            // Check for illegal content-type 
-                            var v = value.ToUpperInvariant().Trim('\0');
-                            if (v.Equals("TEXT") || v.Equals("TEXT/"))
-                                value = "text/plain";
-
-                            try
-                            {
-                                contentType.MediaType = value;
-                            }
-                            catch
-                            {
-                                Logger.WriteToLog($"The mediatype '{value}' is invalid, using application/octet-stream instead");
-                                contentType.MediaType = "application/octet-stream";
-                            }
-
-                            isMediaTypeProcessed = true;
+                            contentType.MediaType = value;
                         }
-                        break;
+                        catch
+                        {
+                            Logger.WriteToLog(
+                                $"The mediatype '{value}' is invalid, using application/octet-stream instead");
+                            contentType.MediaType = "application/octet-stream";
+                        }
 
-	                case "BOUNDARY":
-	                    contentType.Boundary = value;
-	                    break;
+                        isMediaTypeProcessed = true;
+                    }
 
-	                case "CHARSET":
-	                    contentType.CharSet = value;
-	                    break;
+                    break;
 
-	                case "NAME":
-	                    contentType.Name = EncodedWord.Decode(value);
-	                    break;
+                case "BOUNDARY":
+                    contentType.Boundary = value;
+                    break;
 
-	                default:
-	                    // This is to shut up the code help that is saying that contentType.Parameters
-	                    // can be null - which it cant!
-	                    if (contentType.Parameters == null)
-	                        throw new Exception("The ContentType parameters property is null. This will never be thrown.");
+                case "CHARSET":
+                    contentType.CharSet = value;
+                    break;
 
-	                    // We add the unknown value to our parameters list
-	                    // "Known" unknown values are:
-	                    // - title
-	                    // - report-type
-	                    contentType.Parameters.Add(key, value);
-	                    break;
-	            }
-	        }
+                case "NAME":
+                    contentType.Name = EncodedWord.Decode(value);
+                    break;
 
-	        return contentType;
-	    }
-	    #endregion
+                default:
+                    // This is to shut up the code help that is saying that contentType.Parameters
+                    // can be null - which it cant!
+                    if (contentType.Parameters == null)
+                        throw new Exception("The ContentType parameters property is null. This will never be thrown.");
 
-        #region ParseContentDisposition
-        /// <summary>
-	    /// Parses a the value for the header Content-Disposition to a <see cref="ContentDisposition"/> object.
-	    /// </summary>
-	    /// <param name="headerValue">The value to be parsed</param>
-	    /// <returns>A <see cref="ContentDisposition"/> object</returns>
-	    /// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
-	    public static ContentDisposition ParseContentDisposition(string headerValue)
-	    {
-	        if (headerValue == null)
-	            throw new ArgumentNullException(nameof(headerValue));
+                    // We add the unknown value to our parameters list
+                    // "Known" unknown values are:
+                    // - title
+                    // - report-type
+                    contentType.Parameters.Add(key, value);
+                    break;
+            }
+        }
 
-	        // See http://www.ietf.org/rfc/rfc2183.txt for RFC definition
+        return contentType;
+    }
+    #endregion
 
-	        // Create empty ContentDisposition - we will fill in details as we read them
-	        var contentDisposition = new ContentDisposition();
+    #region ParseContentDisposition
+    /// <summary>
+    ///     Parses a the value for the header Content-Disposition to a <see cref="ContentDisposition" /> object.
+    /// </summary>
+    /// <param name="headerValue">The value to be parsed</param>
+    /// <returns>A <see cref="ContentDisposition" /> object</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="headerValue" /> is <see langword="null" /></exception>
+    public static ContentDisposition ParseContentDisposition(string headerValue)
+    {
+        if (headerValue == null)
+            throw new ArgumentNullException(nameof(headerValue));
 
-	        // Now decode the parameters
-	        var parameters = Rfc2231Decoder.Decode(headerValue);
+        // See http://www.ietf.org/rfc/rfc2183.txt for RFC definition
 
-	        foreach (var keyValuePair in parameters)
-	        {
-	            var key = keyValuePair.Key.ToUpperInvariant().Trim();
-	            var value = Utility.RemoveQuotesIfAny(keyValuePair.Value.Trim());
-	            switch (key)
-	            {
-	                case "":
-	                    // This is the DispisitionType - it has no key since it is the first one
-	                    // and has no = in it.
-	                    contentDisposition.DispositionType = value;
-	                    break;
+        // Create empty ContentDisposition - we will fill in details as we read them
+        var contentDisposition = new ContentDisposition();
 
-	                    // The correct name of the parameter is filename, but some emails also contains the parameter
-	                    // name, which also holds the name of the file. Therefore we use both names for the same field.
-	                case "NAME":
-	                case "FILENAME":
-	                    // The filename might be in qoutes, and it might be encoded-word encoded
-	                    contentDisposition.FileName = EncodedWord.Decode(value);
-	                    break;
+        // Now decode the parameters
+        var parameters = Rfc2231Decoder.Decode(headerValue);
 
-	                case "CREATION-DATE":
-	                    // Notice that we need to create a new DateTime because of a failure in .NET 2.0.
-	                    // The failure is: you cannot give contentDisposition a DateTime with a Kind of UTC
-	                    // It will set the CreationDate correctly, but when trying to read it out it will throw an exception.
-	                    // It is the same with ModificationDate and ReadDate.
-	                    // This is fixed in 4.0 - maybe in 3.0 too.
-	                    // Therefore we create a new DateTime which have a DateTimeKind set to unspecified
-	                    var creationDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
-	                    contentDisposition.CreationDate = creationDate;
-	                    break;
+        foreach (var keyValuePair in parameters)
+        {
+            var key = keyValuePair.Key.ToUpperInvariant().Trim();
+            var value = Utility.RemoveQuotesIfAny(keyValuePair.Value.Trim());
+            switch (key)
+            {
+                case "":
+                    // This is the DispisitionType - it has no key since it is the first one
+                    // and has no = in it.
+                    contentDisposition.DispositionType = value;
+                    break;
 
-	                case "MODIFICATION-DATE":
-                    case "MODIFICATION-DATE-PARM":
-                        var midificationDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
-	                    contentDisposition.ModificationDate = midificationDate;
-	                    break;
+                // The correct name of the parameter is filename, but some emails also contains the parameter
+                // name, which also holds the name of the file. Therefore we use both names for the same field.
+                case "NAME":
+                case "FILENAME":
+                    // The filename might be in qoutes, and it might be encoded-word encoded
+                    contentDisposition.FileName = EncodedWord.Decode(value);
+                    break;
 
-	                case "READ-DATE":
-	                    var readDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
-	                    contentDisposition.ReadDate = readDate;
-	                    break;
+                case "CREATION-DATE":
+                    // Notice that we need to create a new DateTime because of a failure in .NET 2.0.
+                    // The failure is: you cannot give contentDisposition a DateTime with a Kind of UTC
+                    // It will set the CreationDate correctly, but when trying to read it out it will throw an exception.
+                    // It is the same with ModificationDate and ReadDate.
+                    // This is fixed in 4.0 - maybe in 3.0 too.
+                    // Therefore we create a new DateTime which have a DateTimeKind set to unspecified
+                    var creationDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
+                    contentDisposition.CreationDate = creationDate;
+                    break;
 
-	                case "SIZE":
-	                    contentDisposition.Size = SizeParser.Parse(value);
-	                    break;
+                case "MODIFICATION-DATE":
+                case "MODIFICATION-DATE-PARM":
+                    var midificationDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
+                    contentDisposition.ModificationDate = midificationDate;
+                    break;
 
-	                case "CHARSET": // ignoring invalid parameter in Content-Disposition
-                    case "VOICE":
-                        break;
+                case "READ-DATE":
+                    var readDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
+                    contentDisposition.ReadDate = readDate;
+                    break;
 
-	                default:
-	                    if (!key.StartsWith("X-"))
-	                        throw new ArgumentException(
-	                            "Unknown parameter in Content-Disposition. Ask developer to fix! Parameter: " + key);
-	                    contentDisposition.Parameters.Add(key, value);
-	                    break;
+                case "SIZE":
+                    contentDisposition.Size = SizeParser.Parse(value);
+                    break;
 
+                case "CHARSET": // ignoring invalid parameter in Content-Disposition
+                case "VOICE":
+                    break;
 
-	            }
-	        }
+                default:
+                    if (!key.StartsWith("X-"))
+                        throw new ArgumentException(
+                            "Unknown parameter in Content-Disposition. Ask developer to fix! Parameter: " + key);
+                    contentDisposition.Parameters.Add(key, value);
+                    break;
+            }
+        }
 
-	        return contentDisposition;
-	    }
-	    #endregion
+        return contentDisposition;
+    }
+    #endregion
 
-        #region ParseId
-        /// <summary>
-	    /// Parses an ID like Message-Id and Content-Id.<br/>
-	    /// Example:<br/>
-	    /// <c>&lt;test@test.com&gt;</c><br/>
-	    /// into<br/>
-	    /// <c>test@test.com</c>
-	    /// </summary>
-	    /// <param name="headerValue">The id to parse</param>
-	    /// <returns>A parsed ID</returns>
-	    public static string ParseId(string headerValue)
-	    {
-	        // Remove whitespace in front and behind since
-	        // whitespace is allowed there
-	        // Remove the last > and the first <
-	        return headerValue.Trim().TrimEnd('>').TrimStart('<');
-	    }
-	    #endregion
+    #region ParseId
+    /// <summary>
+    ///     Parses an ID like Message-Id and Content-Id.<br />
+    ///     Example:<br />
+    ///     <c>&lt;test@test.com&gt;</c><br />
+    ///     into<br />
+    ///     <c>test@test.com</c>
+    /// </summary>
+    /// <param name="headerValue">The id to parse</param>
+    /// <returns>A parsed ID</returns>
+    public static string ParseId(string headerValue)
+    {
+        // Remove whitespace in front and behind since
+        // whitespace is allowed there
+        // Remove the last > and the first <
+        return headerValue.Trim().TrimEnd('>').TrimStart('<');
+    }
+    #endregion
 
-        #region ParseMultipleIDs
-        /// <summary>
-	    /// Parses multiple IDs from a single string like In-Reply-To.
-	    /// </summary>
-	    /// <param name="headerValue">The value to parse</param>
-	    /// <returns>A list of IDs</returns>
-	    public static List<string> ParseMultipleIDs(string headerValue)
-	    {
-	        // Split the string by >
-	        // We cannot use ' ' (space) here since this is a possible value:
-	        // <test@test.com><test2@test.com>
-	        var ids = headerValue.Trim().Split(new[] {'>'}, StringSplitOptions.RemoveEmptyEntries);
-	        return ids.Select(ParseId).ToList();
-	    }
-	    #endregion
-	}
+    #region ParseMultipleIDs
+    /// <summary>
+    ///     Parses multiple IDs from a single string like In-Reply-To.
+    /// </summary>
+    /// <param name="headerValue">The value to parse</param>
+    /// <returns>A list of IDs</returns>
+    public static List<string> ParseMultipleIDs(string headerValue)
+    {
+        // Split the string by >
+        // We cannot use ' ' (space) here since this is a possible value:
+        // <test@test.com><test2@test.com>
+        var ids = headerValue.Trim().Split(new[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
+        return ids.Select(ParseId).ToList();
+    }
+    #endregion
 }

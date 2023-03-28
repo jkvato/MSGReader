@@ -27,66 +27,65 @@
 using System;
 using MsgReader.Helpers;
 
-namespace MsgReader.Outlook
+namespace MsgReader.Outlook;
+
+public partial class Storage
 {
-    public partial class Storage
+    /// <summary>
+    ///     This class contains information about the person that has received this message
+    /// </summary>
+    public sealed class ReceivedBy : Storage
     {
+        #region Properties
         /// <summary>
-        /// This class contains information about the person that has received this message
+        ///     Returns the address type (e.g. SMTP)
         /// </summary>
-        public sealed class ReceivedBy : Storage
+        public string AddressType { get; }
+
+        /// <summary>
+        ///     Returns the E-mail address, null when not available
+        /// </summary>
+        public string Email { get; }
+
+        /// <summary>
+        ///     Returns the display name, null when not available
+        /// </summary>
+        public string DisplayName { get; }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Storage.ReceivedBy" /> class.
+        /// </summary>
+        internal ReceivedBy(string addressType, string email, string displayName)
         {
-            #region Properties
-            /// <summary>
-            /// Returns the address type (e.g. SMTP)
-            /// </summary>
-            public string AddressType { get; }
-            
-            /// <summary>
-            /// Returns the E-mail address, null when not available
-            /// </summary>
-            public string Email { get; }
+            AddressType = addressType;
+            Email = email;
+            DisplayName = displayName;
 
-            /// <summary>
-            /// Returns the display name, null when not available
-            /// </summary>
-            public string DisplayName { get; }
-            #endregion
+            var tempEmail = EmailAddress.RemoveSingleQuotes(Email);
+            var tempDisplayName = EmailAddress.RemoveSingleQuotes(DisplayName);
 
-            #region Constructor
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Storage.ReceivedBy" /> class.
-            /// </summary>
-            internal ReceivedBy(string addressType, string email, string displayName)
+            Email = tempEmail;
+            DisplayName = tempDisplayName;
+
+            // Sometimes the E-mail address and display name get swapped so check if they are valid
+            if (!EmailAddress.IsEmailAddressValid(tempEmail) && EmailAddress.IsEmailAddressValid(tempDisplayName))
             {
-                AddressType = addressType;
-                Email = email;
-                DisplayName = displayName;
-                
-                var tempEmail = EmailAddress.RemoveSingleQuotes(Email);
-                var tempDisplayName = EmailAddress.RemoveSingleQuotes(DisplayName);
-
-                Email = tempEmail;
-                DisplayName = tempDisplayName;
-
-                // Sometimes the E-mail address and display name get swapped so check if they are valid
-                if (!EmailAddress.IsEmailAddressValid(tempEmail) && EmailAddress.IsEmailAddressValid(tempDisplayName))
-                {
-                    // Swap then
-                    Email = tempDisplayName;
-                    DisplayName = tempEmail;
-                }
-                else if (EmailAddress.IsEmailAddressValid(tempDisplayName))
-                {
-                    // If the displayname is an emailAddress then move it
-                    Email = tempDisplayName;
-                    DisplayName = tempDisplayName;
-                }
-
-                if (string.Equals(tempEmail, tempDisplayName, StringComparison.InvariantCultureIgnoreCase))
-                    DisplayName = string.Empty;
+                // Swap then
+                Email = tempDisplayName;
+                DisplayName = tempEmail;
             }
-            #endregion
+            else if (EmailAddress.IsEmailAddressValid(tempDisplayName))
+            {
+                // If the displayname is an emailAddress then move it
+                Email = tempDisplayName;
+                DisplayName = tempDisplayName;
+            }
+
+            if (string.Equals(tempEmail, tempDisplayName, StringComparison.InvariantCultureIgnoreCase))
+                DisplayName = string.Empty;
         }
+        #endregion
     }
 }

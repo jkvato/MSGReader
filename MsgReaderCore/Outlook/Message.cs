@@ -39,6 +39,8 @@ using MsgReader.Exceptions;
 using MsgReader.Helpers;
 using MsgReader.Localization;
 using MsgReader.Mime.Header;
+using MsgReader.Rtf;
+using MsgReader.Tnef;
 using OpenMcdf;
 
 // ReSharper disable StringLiteralTypo
@@ -51,274 +53,274 @@ namespace MsgReader.Outlook;
 
 #region Enum MessageType
 /// <summary>
-/// The message types
+///     The message types
 /// </summary>
 public enum MessageType
 {
     /// <summary>
-    /// The message type is unknown
+    ///     The message type is unknown
     /// </summary>
     Unknown,
 
     /// <summary>
-    /// The message is a normal E-mail
+    ///     The message is a normal E-mail
     /// </summary>
     Email,
 
     /// <summary>
-    /// Non-delivery report for a standard E-mail (REPORT.IPM.NOTE.NDR)
+    ///     Non-delivery report for a standard E-mail (REPORT.IPM.NOTE.NDR)
     /// </summary>
     EmailNonDeliveryReport,
 
     /// <summary>
-    /// Delivery receipt for a standard E-mail (REPORT.IPM.NOTE.DR)
+    ///     Delivery receipt for a standard E-mail (REPORT.IPM.NOTE.DR)
     /// </summary>
     EmailDeliveryReport,
 
     /// <summary>
-    /// Delivery receipt for a delayed E-mail (REPORT.IPM.NOTE.DELAYED)
+    ///     Delivery receipt for a delayed E-mail (REPORT.IPM.NOTE.DELAYED)
     /// </summary>
     EmailDelayedDeliveryReport,
 
     /// <summary>
-    /// Read receipt for a standard E-mail (REPORT.IPM.NOTE.IPNRN)
+    ///     Read receipt for a standard E-mail (REPORT.IPM.NOTE.IPNRN)
     /// </summary>
     EmailReadReceipt,
 
     /// <summary>
-    /// Non-read receipt for a standard E-mail (REPORT.IPM.NOTE.IPNNRN)
+    ///     Non-read receipt for a standard E-mail (REPORT.IPM.NOTE.IPNNRN)
     /// </summary>
     EmailNonReadReceipt,
 
     /// <summary>
-    /// The message in an E-mail that is encrypted and can also be signed (IPM.Note.SMIME)
+    ///     The message in an E-mail that is encrypted and can also be signed (IPM.Note.SMIME)
     /// </summary>
     EmailEncryptedAndMaybeSigned,
 
     /// <summary>
-    /// Non-delivery report for a Secure MIME (S/MIME) encrypted and opaque-signed E-mail (REPORT.IPM.NOTE.SMIME.NDR)
+    ///     Non-delivery report for a Secure MIME (S/MIME) encrypted and opaque-signed E-mail (REPORT.IPM.NOTE.SMIME.NDR)
     /// </summary>
     EmailEncryptedAndMaybeSignedNonDelivery,
 
     /// <summary>
-    /// Delivery report for a Secure MIME (S/MIME) encrypted and opaque-signed E-mail (REPORT.IPM.NOTE.SMIME.DR)
+    ///     Delivery report for a Secure MIME (S/MIME) encrypted and opaque-signed E-mail (REPORT.IPM.NOTE.SMIME.DR)
     /// </summary>
     EmailEncryptedAndMaybeSignedDelivery,
-    
+
     /// <summary>
-    /// The message is an E-mail that is clear signed (IPM.Note.SMIME.MultipartSigned)
+    ///     The message is an E-mail that is clear signed (IPM.Note.SMIME.MultipartSigned)
     /// </summary>
     EmailClearSigned,
 
     /// <summary>
-    /// The message is a secure read receipt for an E-mail (IPM.Note.Receipt.SMIME)
+    ///     The message is a secure read receipt for an E-mail (IPM.Note.Receipt.SMIME)
     /// </summary>
     EmailClearSignedReadReceipt,
 
     /// <summary>
-    /// Non-delivery report for an S/MIME clear-signed E-mail (REPORT.IPM.NOTE.SMIME.MULTIPARTSIGNED.NDR)
+    ///     Non-delivery report for an S/MIME clear-signed E-mail (REPORT.IPM.NOTE.SMIME.MULTIPARTSIGNED.NDR)
     /// </summary>
     EmailClearSignedNonDelivery,
 
     /// <summary>
-    /// Delivery receipt for an S/MIME clear-signed E-mail (REPORT.IPM.NOTE.SMIME.MULTIPARTSIGNED.DR)
+    ///     Delivery receipt for an S/MIME clear-signed E-mail (REPORT.IPM.NOTE.SMIME.MULTIPARTSIGNED.DR)
     /// </summary>
     EmailClearSignedDelivery,
 
     /// <summary>
-    /// The message is an E-mail that is generared signed (IPM.Note.BMA.Stub)
+    ///     The message is an E-mail that is generared signed (IPM.Note.BMA.Stub)
     /// </summary>
     EmailBmaStub,
 
     /// <summary>
-    /// The message is a short message service (IPM.Note.Mobile.SMS)
+    ///     The message is a short message service (IPM.Note.Mobile.SMS)
     /// </summary>
     EmailSms,
 
     /// <summary>
-    /// The message is a Microsoft template (IPM.Note.Rules.OofTemplate.Microsoft)
+    ///     The message is a Microsoft template (IPM.Note.Rules.OofTemplate.Microsoft)
     /// </summary>
     EmailTemplateMicrosoft,
-    
+
     /// <summary>
-    /// The message is an appointment (IPM.Appointment)
+    ///     The message is an appointment (IPM.Appointment)
     /// </summary>
     Appointment,
 
     /// <summary>
-    /// The message is a notification for an appointment (IPM.Notification.Meeting)
+    ///     The message is a notification for an appointment (IPM.Notification.Meeting)
     /// </summary>
     AppointmentNotification,
 
     /// <summary>
-    /// The message is a schedule for an appointment (IPM.Schedule.Meeting)
+    ///     The message is a schedule for an appointment (IPM.Schedule.Meeting)
     /// </summary>
     AppointmentSchedule,
 
     /// <summary>
-    /// The message is a request for an appointment (IPM.Schedule.Meeting.Request)
+    ///     The message is a request for an appointment (IPM.Schedule.Meeting.Request)
     /// </summary>
     AppointmentRequest,
 
     /// <summary>
-    /// The message is a request for an appointment (REPORT.IPM.SCHEDULE.MEETING.REQUEST.NDR)
+    ///     The message is a request for an appointment (REPORT.IPM.SCHEDULE.MEETING.REQUEST.NDR)
     /// </summary>
     AppointmentRequestNonDelivery,
 
     /// <summary>
-    /// The message is a response to an appointment (IPM.Schedule.Response)
+    ///     The message is a response to an appointment (IPM.Schedule.Response)
     /// </summary>
     AppointmentResponse,
 
     /// <summary>
-    /// The message is a positive response to an appointment (IPM.Schedule.Resp.Pos)
+    ///     The message is a positive response to an appointment (IPM.Schedule.Resp.Pos)
     /// </summary>
     AppointmentResponsePositive,
 
     /// <summary>
-    /// Non-delivery report for a positive meeting response (accept) (REPORT.IPM.SCHEDULE.MEETING.RESP.POS.NDR)
+    ///     Non-delivery report for a positive meeting response (accept) (REPORT.IPM.SCHEDULE.MEETING.RESP.POS.NDR)
     /// </summary>
     AppointmentResponsePositiveNonDelivery,
 
     /// <summary>
-    /// The message is a negative response to an appointment (IPM.Schedule.Resp.Neg)
+    ///     The message is a negative response to an appointment (IPM.Schedule.Resp.Neg)
     /// </summary>
     AppointmentResponseNegative,
 
     /// <summary>
-    /// Non-delivery report for a negative meeting response (declinet) (REPORT.IPM.SCHEDULE.MEETING.RESP.NEG.NDR)
+    ///     Non-delivery report for a negative meeting response (declinet) (REPORT.IPM.SCHEDULE.MEETING.RESP.NEG.NDR)
     /// </summary>
     AppointmentResponseNegativeNonDelivery,
 
     /// <summary>
-    /// The message is a response to tentatively accept the meeting request (IPM.Schedule.Meeting.Resp.Tent)
+    ///     The message is a response to tentatively accept the meeting request (IPM.Schedule.Meeting.Resp.Tent)
     /// </summary>
     AppointmentResponseTentative,
-    
+
     /// <summary>
-    /// Non-delivery report for a Tentative meeting response (REPORT.IPM.SCHEDULE.MEETING.RESP.TENT.NDR)
+    ///     Non-delivery report for a Tentative meeting response (REPORT.IPM.SCHEDULE.MEETING.RESP.TENT.NDR)
     /// </summary>
     AppointmentResponseTentativeNonDelivery,
 
     /// <summary>
-    /// The message is a cancelation an appointment (IPM.Schedule.Meeting.Canceled)
+    ///     The message is a cancelation an appointment (IPM.Schedule.Meeting.Canceled)
     /// </summary>
     AppointmentResponseCanceled,
 
     /// <summary>
-    /// Non-delivery report for a cancelled meeting notification (REPORT.IPM.SCHEDULE.MEETING.CANCELED.NDR)
+    ///     Non-delivery report for a cancelled meeting notification (REPORT.IPM.SCHEDULE.MEETING.CANCELED.NDR)
     /// </summary>
     AppointmentResponseCanceledNonDelivery,
 
     /// <summary>
-    /// The message is a contact card (IPM.Contact)
+    ///     The message is a contact card (IPM.Contact)
     /// </summary>
     Contact,
 
     /// <summary>
-    /// The message is a task (IPM.Task)
+    ///     The message is a task (IPM.Task)
     /// </summary>
     Task,
 
     /// <summary>
-    /// The message is a task request accept (IPM.TaskRequest.Accept)
+    ///     The message is a task request accept (IPM.TaskRequest.Accept)
     /// </summary>
     TaskRequestAccept,
 
     /// <summary>
-    /// The message is a task request decline (IPM.TaskRequest.Decline)
+    ///     The message is a task request decline (IPM.TaskRequest.Decline)
     /// </summary>
     TaskRequestDecline,
 
     /// <summary>
-    /// The message is a task request update (IPM.TaskRequest.Update)
+    ///     The message is a task request update (IPM.TaskRequest.Update)
     /// </summary>
     TaskRequestUpdate,
 
     /// <summary>
-    /// The message is a sticky note (IPM.StickyNote)
+    ///     The message is a sticky note (IPM.StickyNote)
     /// </summary>
     StickyNote,
 
     /// <summary>
-    /// The message is Cisco Unity Voice message (IPM.Note.Custom.Cisco.Unity.Voice)
+    ///     The message is Cisco Unity Voice message (IPM.Note.Custom.Cisco.Unity.Voice)
     /// </summary>
     CiscoUnityVoiceMessage,
 
     /// <summary>
-    /// IPM.NOTE.RIGHTFAX.ADV
+    ///     IPM.NOTE.RIGHTFAX.ADV
     /// </summary>
     RightFaxAdv,
 
     /// <summary>
-    /// The message is Skype for Business missed message (IPM.Note.Microsoft.Missed)
+    ///     The message is Skype for Business missed message (IPM.Note.Microsoft.Missed)
     /// </summary>
     SkypeForBusinessMissedMessage,
 
     /// <summary>
-    /// The message is a Skype for Business conversation (IPM.Note.Microsoft.Conversation)
+    ///     The message is a Skype for Business conversation (IPM.Note.Microsoft.Conversation)
     /// </summary>
     SkypeForBusinessConversation,
 
     /// <summary>
-    /// Upon an unsuccessful import, updates the Message Class of the source message to
-    /// IPM.Note.WorkSite.Ems.Error. EFS – Exchange transaction.
+    ///     Upon an unsuccessful import, updates the Message Class of the source message to
+    ///     IPM.Note.WorkSite.Ems.Error. EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsError,
 
     /// <summary>
-    /// Filing Worker attempts to update the Message Class to reflect whether the Email
-    /// filed successfully (“IPM.Note.Worksite.Ems.Filed”). EFS – Exchange transaction.
+    ///     Filing Worker attempts to update the Message Class to reflect whether the Email
+    ///     filed successfully (“IPM.Note.Worksite.Ems.Filed”). EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsFiled,
 
     /// <summary>
-    /// Filing Worker attempts to update the Message Class to reflect whether the Email
-    /// filed successfully (“IPM.Note.Worksite.Ems.Filed”). EFS – Exchange transaction.
+    ///     Filing Worker attempts to update the Message Class to reflect whether the Email
+    ///     filed successfully (“IPM.Note.Worksite.Ems.Filed”). EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsFiledFw,
 
     /// <summary>
-    /// Filing Worker attempts to update the Message Class to reflect whether the Email
-    /// filed successfully (“IPM.Note.Worksite.Ems.Filed”). EFS – Exchange transaction.
+    ///     Filing Worker attempts to update the Message Class to reflect whether the Email
+    ///     filed successfully (“IPM.Note.Worksite.Ems.Filed”). EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsFiledRe,
 
     /// <summary>
-    /// EFS – Exchange transaction.
+    ///     EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsFw,
 
     /// <summary>
-    /// EM client updates Message Class of the Email to queued on the Exchange.
-    /// EM Client – Exchange transaction. (custom message class “IPM.Note.Worksite.Ems.Queued”
-    /// is used to denote the fact that the message has been queued on the Exchange side) At
-    /// this stage user gets hourglass icon for the message, which means message has been queued
+    ///     EM client updates Message Class of the Email to queued on the Exchange.
+    ///     EM Client – Exchange transaction. (custom message class “IPM.Note.Worksite.Ems.Queued”
+    ///     is used to denote the fact that the message has been queued on the Exchange side) At
+    ///     this stage user gets hourglass icon for the message, which means message has been queued
     /// </summary>
     WorkSiteEmsQueued,
 
     /// <summary>
-    /// EFS – Exchange transaction.
+    ///     EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsRe,
 
     /// <summary>
-    /// EFS – Exchange transaction.
+    ///     EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsSent,
 
     /// <summary>
-    /// EFS – Exchange transaction.
+    ///     EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsSentFw,
 
     /// <summary>
-    /// EFS – Exchange transaction.
+    ///     EFS – Exchange transaction.
     /// </summary>
     WorkSiteEmsSentRe,
 
     /// <summary>
-    /// The message is Outlook journal message
+    ///     The message is Outlook journal message
     /// </summary>
     Journal
 }
@@ -326,22 +328,22 @@ public enum MessageType
 
 #region Enum MessageImportance
 /// <summary>
-/// The importancy of the message
+///     The importancy of the message
 /// </summary>
 public enum MessageImportance
 {
     /// <summary>
-    /// Low
+    ///     Low
     /// </summary>
     Low = 0,
 
     /// <summary>
-    /// Normal
+    ///     Normal
     /// </summary>
     Normal = 1,
 
     /// <summary>
-    /// High
+    ///     High
     /// </summary>
     High = 2
 }
@@ -350,194 +352,193 @@ public enum MessageImportance
 public partial class Storage
 {
     /// <summary>
-    /// Class represent a MSG object
+    ///     Class represent a MSG object
     /// </summary>
     public class Message : Storage
     {
         #region Fields
         /// <summary>
-        /// The name of the <see cref="CFStorage"/> stream that contains this message
+        ///     The name of the <see cref="CFStorage" /> stream that contains this message
         /// </summary>
         internal string StorageName { get; }
 
         /// <summary>
-        /// Contains the <see cref="MessageType"/> of this Message
+        ///     Contains the <see cref="MessageType" /> of this Message
         /// </summary>
         private MessageType _type = MessageType.Unknown;
 
         /// <summary>
-        /// contains the name of the <see cref="Storage.Message"/> file
+        ///     contains the name of the <see cref="Storage.Message" /> file
         /// </summary>
         private string _fileName;
 
         /// <summary>
-        /// Contains the date and time when the message was created or null
-        /// when not available
+        ///     Contains the date and time when the message was created or null
+        ///     when not available
         /// </summary>
         private DateTime? _creationTime;
 
         /// <summary>
-        /// Contains the name of the last user (or creator) that has changed the Message object or
-        /// null when not available
+        ///     Contains the name of the last user (or creator) that has changed the Message object or
+        ///     null when not available
         /// </summary>
         private string _lastModifierName;
 
         /// <summary>
-        /// Contains the date and time when the message was created or null
-        /// when not available
+        ///     Contains the date and time when the message was created or null
+        ///     when not available
         /// </summary>
         private DateTime? _lastModificationTime;
 
         /// <summary>
-        /// contains all the <see cref="Storage.Recipient"/> objects
+        ///     contains all the <see cref="Storage.Recipient" /> objects
         /// </summary>
         private readonly List<Recipient> _recipients = new();
 
         /// <summary>
-        /// Contains an URL to the help page of a mailing list
+        ///     Contains an URL to the help page of a mailing list
         /// </summary>
         private string _mailingListHelp;
 
         /// <summary>
-        /// Contains an URL to the subscribe page of a mailing list
+        ///     Contains an URL to the subscribe page of a mailing list
         /// </summary>
         private string _mailingListSubscribe;
 
         /// <summary>
-        /// Contains an URL to the unsubscribe page of a mailing list
+        ///     Contains an URL to the unsubscribe page of a mailing list
         /// </summary>
         private string _mailingListUnsubscribe;
 
         /// <summary>
-        /// Contains the date/time in UTC format when the <see cref="Storage.Message"/> object has been sent,
-        /// null when not available
+        ///     Contains the date/time in UTC format when the <see cref="Storage.Message" /> object has been sent,
+        ///     null when not available
         /// </summary>
         private DateTime? _sentOn;
 
         /// <summary>
-        /// Contains the date/time in UTC format when the <see cref="Storage.Message"/> object has been received,
-        /// null when not available
+        ///     Contains the date/time in UTC format when the <see cref="Storage.Message" /> object has been received,
+        ///     null when not available
         /// </summary>
         private DateTime? _receivedOn;
 
         /// <summary>
-        /// Contains the <see cref="MessageImportance"/> of the <see cref="Storage.Message"/> object,
-        /// null when not available
+        ///     Contains the <see cref="MessageImportance" /> of the <see cref="Storage.Message" /> object,
+        ///     null when not available
         /// </summary>
         private MessageImportance? _importance;
 
         /// <summary>
-        /// Contains all the <see cref="Storage.Attachment"/> and <see cref="Storage.Message"/> objects.
+        ///     Contains all the <see cref="Storage.Attachment" /> and <see cref="Storage.Message" /> objects.
         /// </summary>
         private readonly List<object> _attachments = new();
 
         private bool _attachmentsChecked;
 
         /// <summary>
-        /// Contains the subject prefix of the <see cref="Storage.Message"/> object
+        ///     Contains the subject prefix of the <see cref="Storage.Message" /> object
         /// </summary>
         private string _subjectPrefix;
 
         /// <summary>
-        /// Contains the subject of the <see cref="Storage.Message"/> object
+        ///     Contains the subject of the <see cref="Storage.Message" /> object
         /// </summary>
         private string _subject;
 
         /// <summary>
-        /// Contains the normalized subject of the <see cref="Storage.Message"/> object
+        ///     Contains the normalized subject of the <see cref="Storage.Message" /> object
         /// </summary>
         private string _subjectNormalized;
 
         /// <summary>
-        /// Contains the text body of the <see cref="Storage.Message"/> object
+        ///     Contains the text body of the <see cref="Storage.Message" /> object
         /// </summary>
         private string _bodyText;
 
         /// <summary>
-        /// Contains the html body of the <see cref="Storage.Message"/> object
+        ///     Contains the html body of the <see cref="Storage.Message" /> object
         /// </summary>
         private string _bodyHtml;
 
         /// <summary>
-        /// Contains the rtf body of the <see cref="Storage.Message"/> object
+        ///     Contains the rtf body of the <see cref="Storage.Message" /> object
         /// </summary>
         private string _bodyRtf;
 
         /// <summary>
-        /// Contains the the Windows LCID of the end user who created this <see cref = "Storage.Message" />
+        ///     Contains the the Windows LCID of the end user who created this <see cref="Storage.Message" />
         /// </summary>
         private RegionInfo _messageLocalId;
 
         /// <summary>
-        /// Contains the <see cref="Storage.Flag"/> object
+        ///     Contains the <see cref="Storage.Flag" /> object
         /// </summary>
         private Flag _flag;
 
         /// <summary>
-        /// Contains the <see cref="Storage.Task"/> object
+        ///     Contains the <see cref="Storage.Task" /> object
         /// </summary>
         private Task _task;
 
         /// <summary>
-        /// Contains the <see cref="Storage.Appointment"/> object
+        ///     Contains the <see cref="Storage.Appointment" /> object
         /// </summary>
         private Appointment _appointment;
 
         /// <summary>
-        /// Contains the <see cref="Storage.Contact"/> object
+        ///     Contains the <see cref="Storage.Contact" /> object
         /// </summary>
         private Contact _contact;
 
         /// <summary>
-        /// Contains the <see cref="Storage.Log"/> object
+        ///     Contains the <see cref="Storage.Log" /> object
         /// </summary>
         private Log _log;
-        
+
         /// <summary>
-        /// Contains the <see cref="Storage.ReceivedBy"/> object
+        ///     Contains the <see cref="Storage.ReceivedBy" /> object
         /// </summary>
         private ReceivedBy _receivedBy;
 
         /// <summary>
-        /// The conversation index
+        ///     The conversation index
         /// </summary>
         private string _conversationIndex;
 
         /// <summary>
-        /// The conversation topic
+        ///     The conversation topic
         /// </summary>
         private string _conversationTopic;
 
         /// <summary>
-        /// The message size
+        ///     The message size
         /// </summary>
         private int? _messageSize;
 
         /// <summary>
-        /// The transport message headers
+        ///     The transport message headers
         /// </summary>
         private string _transportMessageHeaders;
-
         #endregion
 
         // ##### Begin HDS
         /// <summary>
-        /// Gets or sets a value indicating whether email addresses will be displayed
-        /// with the full name.
+        ///     Gets or sets a value indicating whether email addresses will be displayed
+        ///     with the full name.
         /// </summary>
         public static bool UseDisplayNameAndEmailAddresses { get; set; }
         // ##### End HDS
 
         #region Properties
         /// <summary>
-        /// Returns the ID of the message when the MSG file has been sent across the internet 
-        /// (as specified in [RFC2822]). Null when not available
+        ///     Returns the ID of the message when the MSG file has been sent across the internet 
+        ///     (as specified in [RFC2822]). Null when not available
         /// </summary>
         public string Id => GetMapiPropertyString(MapiTags.PR_INTERNET_MESSAGE_ID);
 
         #region Type
         /// <summary>
-        /// Gives the <see cref="MessageType">type</see> of this message object
+        ///     Gives the <see cref="MessageType">type</see> of this message object
         /// </summary>
         public MessageType Type
         {
@@ -684,7 +685,7 @@ public partial class Storage
                     case "IPM.SCHEDULE.MEETING.CANCELED.NDR":
                         _type = MessageType.AppointmentResponseCanceledNonDelivery;
                         break;
-                    
+                        
                     case "IPM.SCHEDULE.MEETING.RESPONSE":
                         _type = MessageType.AppointmentResponse;
                         break;
@@ -744,7 +745,7 @@ public partial class Storage
                     case "IPM.NOTE.RIGHTFAX.ADV":
                         _type = MessageType.RightFaxAdv;
                         break;
-                    
+                        
                     case "IPM.NOTE.MICROSOFT.MISSED":
                         _type = MessageType.SkypeForBusinessMissedMessage;
                         break;
@@ -764,9 +765,9 @@ public partial class Storage
         #endregion
 
         /// <summary>
-        /// Returns the filename of the message object. For message objects Outlook uses the subject. It strips
-        /// invalid filename characters. When there is no filename the name from <see cref="LanguageConsts.NameLessFileName"/>
-        /// will be used
+        ///     Returns the filename of the message object. For message objects Outlook uses the subject. It strips
+        ///     invalid filename characters. When there is no filename the name from <see cref="LanguageConsts.NameLessFileName" />
+        ///     will be used
         /// </summary>
         public string FileName
         {
@@ -786,47 +787,49 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the date and time when the message was created or null
-        /// when not available
+        ///     Returns the date and time when the message was created or null
+        ///     when not available
         /// </summary>
         public DateTime? CreationTime => _creationTime ??= GetMapiPropertyDateTime(MapiTags.PR_CREATION_TIME);
 
         /// <summary>
-        /// Returns the name of the last user (or creator) that has changed the Message object or
-        /// null when not available
+        ///     Returns the name of the last user (or creator) that has changed the Message object or
+        ///     null when not available
         /// </summary>
         public string LastModifierName => _lastModifierName ??= GetMapiPropertyString(MapiTags.PR_LAST_MODIFIER_NAME_W);
 
         /// <summary>
-        /// Returns the date and time when the message was last modified or null
-        /// when not available
+        ///     Returns the date and time when the message was last modified or null
+        ///     when not available
         /// </summary>
-        public DateTime? LastModificationTime => _lastModificationTime ??= GetMapiPropertyDateTime(MapiTags.PR_LAST_MODIFICATION_TIME);
+        public DateTime? LastModificationTime =>
+            _lastModificationTime ??= GetMapiPropertyDateTime(MapiTags.PR_LAST_MODIFICATION_TIME);
 
         /// <summary>
-        /// Returns the raw Transport Message Headers
+        ///     Returns the raw Transport Message Headers
         /// </summary>
         public string TransportMessageHeaders => _transportMessageHeaders;
+
         /// <summary>
-        /// Returns the sender of the Message
+        ///     Returns the sender of the Message
         /// </summary>
         // ReSharper disable once CSharpWarnings::CS0109
         public new Sender Sender { get; private set; }
 
         /// <summary>
-        /// Returns the representing sender of the Message, null when not available
+        ///     Returns the representing sender of the Message, null when not available
         /// </summary>
         // ReSharper disable once CSharpWarnings::CS0109
         public new SenderRepresenting SenderRepresenting { get; private set; }
-        
+
         /// <summary>
-        /// Returns the list of recipients in the message object
+        ///     Returns the list of recipients in the message object
         /// </summary>
         public List<Recipient> Recipients => _recipients;
 
         /// <summary>
-        /// Returns an URL to the help page of an mailing list when this message is part of a mailing
-        /// or null when not available
+        ///     Returns an URL to the help page of an mailing list when this message is part of a mailing
+        ///     or null when not available
         /// </summary>
         public string MailingListHelp
         {
@@ -850,8 +853,8 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns an URL to the subscribe page of an mailing list when this message is part of a mailing
-        /// or null when not available
+        ///     Returns an URL to the subscribe page of an mailing list when this message is part of a mailing
+        ///     or null when not available
         /// </summary>
         public string MailingListSubscribe
         {
@@ -875,7 +878,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns an URL to the unsubscribe page of an mailing list when this message is part of a mailing
+        ///     Returns an URL to the unsubscribe page of an mailing list when this message is part of a mailing
         /// </summary>
         public string MailingListUnsubscribe
         {
@@ -899,7 +902,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the date/time in UTC format when the message object has been sent, null when not available
+        ///     Returns the date/time in UTC format when the message object has been sent, null when not available
         /// </summary>
         public DateTime? SentOn
         {
@@ -909,7 +912,7 @@ public partial class Storage
                     return _sentOn;
 
                 _sentOn = GetMapiPropertyDateTime(MapiTags.PR_CLIENT_SUBMIT_TIME) ??
-                                GetMapiPropertyDateTime(MapiTags.PR_PROVIDER_SUBMIT_TIME);
+                          GetMapiPropertyDateTime(MapiTags.PR_PROVIDER_SUBMIT_TIME);
 
                 if (_sentOn == null && Headers != null)
                     _sentOn = Headers.DateSent.ToLocalTime();
@@ -919,12 +922,13 @@ public partial class Storage
         }
 
         /// <summary>
-        /// PR_MESSAGE_DELIVERY_TIME  is the time that the message was delivered to the store and 
-        /// PR_CLIENT_SUBMIT_TIME  is the time when the message was sent by the client (Outlook) to the server.
-        /// Now in this case when the Outlook is offline, it refers to the local store. Therefore when an email is sent, 
-        /// it gets submitted to the local store and PR_MESSAGE_DELIVERY_TIME  gets set the that time. Once the Outlook is 
-        /// online at that point the message gets submitted by the client to the server and the PR_CLIENT_SUBMIT_TIME  gets stamped. 
-        /// Null when not available
+        ///     PR_MESSAGE_DELIVERY_TIME  is the time that the message was delivered to the store and
+        ///     PR_CLIENT_SUBMIT_TIME  is the time when the message was sent by the client (Outlook) to the server.
+        ///     Now in this case when the Outlook is offline, it refers to the local store. Therefore when an email is sent,
+        ///     it gets submitted to the local store and PR_MESSAGE_DELIVERY_TIME  gets set the that time. Once the Outlook is
+        ///     online at that point the message gets submitted by the client to the server and the PR_CLIENT_SUBMIT_TIME  gets
+        ///     stamped.
+        ///     Null when not available
         /// </summary>
         public DateTime? ReceivedOn
         {
@@ -943,7 +947,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the <see cref="MessageImportance"/> of the <see cref="Storage.Message"/> object, null when not available
+        ///     Returns the <see cref="MessageImportance" /> of the <see cref="Storage.Message" /> object, null when not available
         /// </summary>
         public MessageImportance? Importance
         {
@@ -979,7 +983,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the <see cref="MessageImportance"/> of the <see cref="Storage.Message"/> object object as text
+        ///     Returns the <see cref="MessageImportance" /> of the <see cref="Storage.Message" /> object object as text
         /// </summary>
         public string ImportanceText
         {
@@ -998,7 +1002,6 @@ public partial class Storage
 
                     case MessageImportance.High:
                         return LanguageConsts.ImportanceHighText;
-
                 }
 
                 return LanguageConsts.ImportanceNormalText;
@@ -1006,8 +1009,8 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns a list with <see cref="Storage.Attachment"/> and/or <see cref="Storage.Message"/> 
-        /// objects that are attachted to the <see cref="Storage.Message"/> object
+        ///     Returns a list with <see cref="Storage.Attachment" /> and/or <see cref="Storage.Message" />
+        ///     objects that are attachted to the <see cref="Storage.Message" /> object
         /// </summary>
         public List<object> Attachments
         {
@@ -1041,8 +1044,8 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the rendering position of this <see cref="Storage.Message"/> object when it was added to another
-        /// <see cref="Storage.Message"/> object and the body type was set to RTF
+        ///     Returns the rendering position of this <see cref="Storage.Message"/> object when it was added to another
+        ///     <see cref="Storage.Message"/> object and the body type was set to RTF
         /// </summary>
         public int RenderingPosition { get; }
 
@@ -1065,7 +1068,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the subject of the <see cref="Storage.Message"/> object
+        ///     Returns the subject of the <see cref="Storage.Message" /> object
         /// </summary>
         public string Subject
         {
@@ -1101,15 +1104,15 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the available E-mail headers. These are only filled when the message
-        /// has been sent accross the internet. Returns null when there aren't any message headers
+        ///     Returns the available E-mail headers. These are only filled when the message
+        ///     has been sent accross the internet. Returns null when there aren't any message headers
         /// </summary>
         public MessageHeader Headers { get; private set; }
 
         // ReSharper disable once CSharpWarnings::CS0109
         /// <summary>
-        /// Returns a <see cref="Flag"/> object when a flag has been set on the <see cref="Storage.Message"/>.
-        /// Returns <c>null</c> when not available.
+        ///     Returns a <see cref="Flag" /> object when a flag has been set on the <see cref="Storage.Message" />.
+        ///     Returns <c>null</c> when not available.
         /// </summary>
         public new Flag Flag
         {
@@ -1129,8 +1132,9 @@ public partial class Storage
 
         // ReSharper disable once CSharpWarnings::CS0109
         /// <summary>
-        /// Returns an <see cref="Appointment"/> object when the <see cref="MessageType"/> is a <see cref="MessageType.Appointment"/>.
-        /// Returns <c>null</c> when not available.
+        ///     Returns an <see cref="Appointment" /> object when the <see cref="MessageType" /> is a
+        ///     <see cref="MessageType.Appointment" />.
+        ///     Returns <c>null</c> when not available.
         /// </summary>
         public new Appointment Appointment
         {
@@ -1159,9 +1163,11 @@ public partial class Storage
 
         // ReSharper disable once CSharpWarnings::CS0109
         /// <summary>
-        /// Returns a <see cref="Task"/> object. This property is only available when: <br/>
-        /// - The <see cref="Storage.Message.Type"/> is an <see cref="MessageType.Email"/> and the <see cref="Flag"/> object is not null<br/>
-        /// - The <see cref="Storage.Message.Type"/> is an <see cref="MessageType.Task"/> or <see cref="MessageType.TaskRequestAccept"/> <br/>
+        ///     Returns a <see cref="Task" /> object. This property is only available when: <br />
+        ///     - The <see cref="Storage.Message.Type" /> is an <see cref="MessageType.Email" /> and the <see cref="Flag" /> object
+        ///     is not null<br />
+        ///     - The <see cref="Storage.Message.Type" /> is an <see cref="MessageType.Task" /> or
+        ///     <see cref="MessageType.TaskRequestAccept" /> <br />
         /// </summary>
         public new Task Task
         {
@@ -1192,8 +1198,9 @@ public partial class Storage
 
         // ReSharper disable once CSharpWarnings::CS0109
         /// <summary>
-        /// Returns a <see cref="Storage.Contact"/> object when the <see cref="MessageType"/> is a <see cref="MessageType.Contact"/>.
-        /// Returns <c>null</c> when not available.
+        ///     Returns a <see cref="Storage.Contact" /> object when the <see cref="MessageType" /> is a
+        ///     <see cref="MessageType.Contact" />.
+        ///     Returns <c>null</c> when not available.
         /// </summary>
         public new Contact Contact
         {
@@ -1218,8 +1225,8 @@ public partial class Storage
 
         // ReSharper disable once CSharpWarnings::CS0109
         /// <summary>
-        /// Returns a <see cref="Log"/> object. This property is only available when the <see cref="Storage.Message.Type"/>
-        /// is a <see cref="MessageType.Journal"/>
+        ///     Returns a <see cref="Log"/> object. This property is only available when the <see cref="Storage.Message.Type"/>
+        ///     is a <see cref="MessageType.Journal"/>
         /// </summary>
         public new Log Log
         {
@@ -1233,13 +1240,13 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the categories that are placed in the Outlook message.
-        /// Only supported for Outlook messages from Outlook 2007 or higher
+        ///     Returns the categories that are placed in the Outlook message.
+        ///     Only supported for Outlook messages from Outlook 2007 or higher
         /// </summary>
         public ReadOnlyCollection<string> Categories => GetMapiPropertyStringList(MapiTags.Keywords);
 
         /// <summary>
-        /// Returns the body of the Outlook message in plain text format.
+        ///     Returns the body of the Outlook message in plain text format.
         /// </summary>
         /// <value> The body of the Outlook message in plain text format. </value>
         public string BodyText
@@ -1255,7 +1262,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the body of the Outlook message in RTF format.
+        ///     Returns the body of the Outlook message in RTF format.
         /// </summary>
         /// <value> The body of the Outlook message in RTF format. </value>
         public string BodyRtf
@@ -1288,7 +1295,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the body of the Outlook message in HTML format.
+        ///     Returns the body of the Outlook message in HTML format.
         /// </summary>
         /// <value> The body of the Outlook message in HTML format. </value>
         public string BodyHtml
@@ -1304,7 +1311,7 @@ public partial class Storage
                 var bodyRtf = BodyRtf;
                 if (bodyRtf != null)
                 {
-                    var rtfDomDocument = new Rtf.Document();
+                    var rtfDomDocument = new Document();
                     rtfDomDocument.ParseRtfText(bodyRtf);
                     if (!string.IsNullOrEmpty(rtfDomDocument.HtmlContent))
                         html = rtfDomDocument.HtmlContent.Trim('\r', '\n');
@@ -1336,9 +1343,9 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the the <see cref="RegionInfo"/> for the Windows LCID of the end user who created this
-        /// <see cref="Storage.Message"/> It will return <c>null</c> when the the Windows LCID could not be 
-        /// read from the <see cref="Storage.Message"/>
+        ///     Returns the the <see cref="RegionInfo"/> for the Windows LCID of the end user who created this
+        ///     <see cref="Storage.Message"/> It will return <c>null</c> when the the Windows LCID could not be 
+        ///     read from the <see cref="Storage.Message"/>
         /// </summary>
         public RegionInfo MessageLocalId
         {
@@ -1357,43 +1364,53 @@ public partial class Storage
                     _messageLocalId = new RegionInfo(specificCulture.LCID);
                 }
                 else
+                {
                     _messageLocalId = new RegionInfo(lcid.Value);
+                }
 
                 return _messageLocalId;
             }
         }
 
         /// <summary>
-        /// Returns true when the signature is valid when the <see cref="MessageType"/> is a <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>.
-        /// It will return <c>null</c> when the signature is invalid or the <see cref="Storage.Message"/> has another <see cref="MessageType"/>
+        ///     Returns true when the signature is valid when the <see cref="MessageType"/> is a
+        ///     <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>.
+        ///     It will return <c>null</c> when the signature is invalid or the <see cref="Storage.Message"/> has another
+        ///     <see cref="MessageType"/>
         /// </summary>
         public bool? SignatureIsValid { get; private set; }
 
         /// <summary>
-        /// Returns the name of the person who signed the <see cref="Storage.Message"/> when the <see cref="MessageType"/> is a 
-        /// <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>. It will return <c>null</c> when the signature is invalid or the <see cref="Storage.Message"/> 
-        /// has another <see cref="MessageType"/>
+        ///     Returns the name of the person who signed the <see cref="Storage.Message"/> when the <see cref="MessageType"/> is
+        ///     a 
+        ///     <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>. It will return <c>null</c> when the signature is invalid
+        ///     or the <see cref="Storage.Message"/> 
+        ///     has another <see cref="MessageType"/>
         /// </summary>
         public string SignedBy { get; private set; }
 
         /// <summary>
-        /// Returns the date and time when the <see cref="Storage.Message"/> has been signed when the <see cref="MessageType"/> is a 
-        /// <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>. It will return <c>null</c> when the signature is invalid or the <see cref="Storage.Message"/> 
-        /// has another <see cref="MessageType"/>
+        ///     Returns the date and time when the <see cref="Storage.Message"/> has been signed when the
+        ///     <see cref="MessageType"/> is a 
+        ///     <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>. It will return <c>null</c> when the signature is invalid
+        ///     or the <see cref="Storage.Message"/> 
+        ///     has another <see cref="MessageType"/>
         /// </summary>
         public DateTime? SignedOn { get; private set; }
 
         /// <summary>
-        /// Returns the certificate that has been used to sign the <see cref="Storage.Message"/> when the <see cref="MessageType"/> is a 
-        /// <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>. It will return <c>null</c> when the signature is invalid or the <see cref="Storage.Message"/> 
-        /// has another <see cref="MessageType"/>
+        ///     Returns the certificate that has been used to sign the <see cref="Storage.Message"/> when the
+        ///     <see cref="MessageType"/> is a 
+        ///     <see cref="MessageType.EmailEncryptedAndMaybeSigned"/>. It will return <c>null</c> when the signature is invalid
+        ///     or the <see cref="Storage.Message"/> 
+        ///     has another <see cref="MessageType"/>
         /// </summary>
         public X509Certificate2 SignedCertificate { get; private set; }
         
         /// <summary>
-        /// Returns information about who has received this message. This information is only
-        /// set when a message has been received and when the message provider stamped this 
-        /// information into this message. Null when not available.
+        ///     Returns information about who has received this message. This information is only
+        ///     set when a message has been received and when the message provider stamped this 
+        ///     information into this message. Null when not available.
         /// </summary>
 #pragma warning disable 109
         public new ReceivedBy ReceivedBy
@@ -1413,7 +1430,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the index of the conversation. When not available <c>null</c> is returned
+        ///     Returns the index of the conversation. When not available <c>null</c> is returned
         /// </summary>
         public string ConversationIndex
         {
@@ -1421,13 +1438,12 @@ public partial class Storage
             {
                 if (_conversationIndex != null)
                     return _conversationIndex;
-                var conversationIndexBytes= GetMapiProperty(MapiTags.PR_CONVERSATION_INDEX);
-                if(conversationIndexBytes is byte[] bytes)
+                var conversationIndexBytes = GetMapiProperty(MapiTags.PR_CONVERSATION_INDEX);
+                if (conversationIndexBytes is byte[] bytes)
                 {
                     _conversationIndex = BitConverter.ToString(bytes, 0);
                     if (!string.IsNullOrWhiteSpace(_conversationIndex) && _conversationIndex.Contains("-"))
                         _conversationIndex = _conversationIndex.Replace("-", "");
-
                 }
 
                 return _conversationIndex ??= string.Empty;
@@ -1435,7 +1451,7 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the topic of the conversation. When not available <c>null</c> is returned
+        ///     Returns the topic of the conversation. When not available <c>null</c> is returned
         /// </summary>
         public string ConversationTopic
         {
@@ -1451,7 +1467,7 @@ public partial class Storage
 
 
         /// <summary>
-        /// Returns the size of the message. When not available <c>null</c> is returned
+        ///     Returns the size of the message. When not available <c>null</c> is returned
         /// </summary>
         public int? Size
         {
@@ -1468,25 +1484,30 @@ public partial class Storage
 
         #region Constructors
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Storage.Message" /> class from a msg file.
+        ///     Initializes a new instance of the <see cref="Storage.Message" /> class from a msg file.
         /// </summary>
         /// <param name="msgfile">The msg file to load</param>
         /// <param name="fileAccess">FileAcces mode, default is Read</param>
-        public Message(string msgfile, FileAccess fileAccess = FileAccess.Read) : base(msgfile, fileAccess) { }
+        public Message(string msgfile, FileAccess fileAccess = FileAccess.Read) : base(msgfile, fileAccess)
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Storage.Message" /> class from a <see cref="Stream" /> containing an IStorage.
+        ///     Initializes a new instance of the <see cref="Storage.Message" /> class from a <see cref="Stream" /> containing an
+        ///     IStorage.
         /// </summary>
         /// <param name="storageStream"> The <see cref="Stream" /> containing an IStorage. </param>
         /// <param name="fileAccess">FileAcces mode, default is Read</param>
-        public Message(Stream storageStream, FileAccess fileAccess = FileAccess.Read) : base(storageStream, fileAccess) { }
+        public Message(Stream storageStream, FileAccess fileAccess = FileAccess.Read) : base(storageStream, fileAccess)
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Storage.Message" /> class on the specified <see cref="CFStorage"/>.
+        ///     Initializes a new instance of the <see cref="Storage.Message" /> class on the specified <see cref="CFStorage"/>.
         /// </summary>
         /// <param name="storage"> The storage to create the <see cref="Storage.Message" /> on. </param>
         /// <param name="renderingPosition"></param>
-        /// <param name="storageName">The name of the <see cref="CFStorage"/> that contains this message</param>
+        /// <param name="storageName">The name of the <see cref="CFStorage" /> that contains this message</param>
         internal Message(CFStorage storage, int renderingPosition, string storageName) : base(storage)
         {
             StorageName = storageName;
@@ -1497,8 +1518,8 @@ public partial class Storage
 
         #region GetHeaders
         /// <summary>
-        /// Try's to read the E-mail transport headers. They are only there when a msg file has been
-        /// sent over the internet. When a message stays inside an Exchange server there are not any headers
+        ///     Try's to read the E-mail transport headers. They are only there when a msg file has been
+        ///     sent over the internet. When a message stays inside an Exchange server there are not any headers
         /// </summary>
         private void GetHeaders()
         {
@@ -1511,7 +1532,7 @@ public partial class Storage
 
         #region LoadStorage
         /// <summary>
-        /// Processes sub storages on the specified storage to capture attachment and recipient data.
+        ///     Processes sub storages on the specified storage to capture attachment and recipient data.
         /// </summary>
         /// <param name="storage"> The storage to check for attachment and recipient data. </param>
         protected override void LoadStorage(CFStorage storage)
@@ -1521,7 +1542,6 @@ public partial class Storage
             base.LoadStorage(storage);
 
             foreach (var storageStatistic in _subStorageStatistics)
-            {
                 // Run specific load method depending on sub storage name prefix
                 if (storageStatistic.Key.StartsWith(MapiTags.RecipStoragePrefix))
                 {
@@ -1545,7 +1565,6 @@ public partial class Storage
                             break;
                     }
                 }
-            }
 
             GetHeaders();
             SetEmailSenderAndRepresentingSender();
@@ -1570,11 +1589,9 @@ public partial class Storage
 
                         // Check if the value is in the named property range (8000 to FFFE (Hex))
                         if (value is >= 32768 and <= 65534)
-                        {
                             // If so then add it to perform mapping later on
                             if (!mappingValues.Contains(propIdentString))
                                 mappingValues.Add(propIdentString);
-                        }
                     }
                 }
 
@@ -1594,11 +1611,9 @@ public partial class Storage
 
                         // Check if the value is in the named property range (8000 to FFFE (Hex))
                         if (value is >= 32768 and <= 65534)
-                        {
                             // If so then add it to perform mapping later on
                             if (!mappingValues.Contains(propIdentString))
                                 mappingValues.Add(propIdentString);
-                        }
                     }
                 }
 
@@ -1620,7 +1635,7 @@ public partial class Storage
 
         #region ProcessSignedContent
         /// <summary>
-        /// Processes the signed content
+        ///     Processes the signed content
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -1634,18 +1649,12 @@ public partial class Storage
             try
             {
                 foreach (var cert in signedCms.Certificates)
-                {
                     if (!cert.Verify())
                         SignatureIsValid = false;
-                }
 
                 foreach (var cryptographicAttributeObject in signedCms.SignerInfos[0].SignedAttributes)
-                {
                     if (cryptographicAttributeObject.Values[0] is Pkcs9SigningTime pkcs9SigningTime)
-                    {
                         SignedOn = pkcs9SigningTime.SigningTime.ToLocalTime();
-                    }
-                }
 
                 var certificate = signedCms.SignerInfos[0].Certificate;
                 if (certificate != null)
@@ -1660,7 +1669,8 @@ public partial class Storage
             }
 
             // Get the decoded attachment
-            using (var memoryStream = StreamHelpers.Manager.GetStream("Message.cs", signedCms.ContentInfo.Content, 0, signedCms.ContentInfo.Content.Length))
+            using (var memoryStream = StreamHelpers.Manager.GetStream("Message.cs", signedCms.ContentInfo.Content, 0,
+                       signedCms.ContentInfo.Content.Length))
             {
                 var eml = Mime.Message.Load(memoryStream);
                 if (eml.TextBody != null)
@@ -1679,7 +1689,7 @@ public partial class Storage
 
         #region LoadEncryptedAndPossibleSignedMessage
         /// <summary>
-        /// Load's and parses a signed message. The signed message should be in an attachment called smime.p7m
+        ///     Load's and parses a signed message. The signed message should be in an attachment called smime.p7m
         /// </summary>
         /// <param name="storage"></param>
         private void LoadEncryptedAndPossibleSignedMessage(CFStorage storage)
@@ -1688,8 +1698,7 @@ public partial class Storage
             var attachment = new Attachment(new Storage(storage), null);
 
             if (attachment.FileName.ToUpperInvariant() != "SMIME.P7M")
-                throw new MRInvalidSignedFile(
-                    "The signed file is not valid, it should contain an attachment called smime.p7m but it didn't");
+                throw new MRInvalidSignedFile("The signed file is not valid, it should contain an attachment called smime.p7m but it didn't");
 
             ProcessSignedContent(attachment.Data);
         }
@@ -1697,7 +1706,7 @@ public partial class Storage
 
         #region LoadEncryptedSignedMessage
         /// <summary>
-        /// Load's and parses a signed message
+        ///     Load's and parses a signed message
         /// </summary>
         /// <param name="storage"></param>
         private void LoadClearSignedMessage(CFStorage storage)
@@ -1707,7 +1716,8 @@ public partial class Storage
             var attachment = new Attachment(new Storage(storage), null);
 
             // Get the decoded attachment
-            using (var memoryStream = StreamHelpers.Manager.GetStream("Message.cs", attachment.Data, 0, attachment.Data.Length))
+            using (var memoryStream =
+                       StreamHelpers.Manager.GetStream("Message.cs", attachment.Data, 0, attachment.Data.Length))
             {
                 var eml = Mime.Message.Load(memoryStream);
 
@@ -1723,12 +1733,10 @@ public partial class Storage
                     _bodyHtml = eml.HtmlBody.GetBodyAsText();
 
                 foreach (var emlAttachment in eml.Attachments)
-                {
                     if (emlAttachment.FileName.ToUpperInvariant() == "SMIME.P7S")
                         ProcessSignedContent(emlAttachment.Body);
                     else
                         _attachments.Add(new Attachment(emlAttachment));
-                }
             }
 
             Logger.WriteToLog("Clear signed message loaded");
@@ -1737,10 +1745,10 @@ public partial class Storage
 
         #region LoadAttachmentStorage
         /// <summary>
-        /// Loads the attachment data out of the specified storage.
+        ///     Loads the attachment data out of the specified storage.
         /// </summary>
         /// <param name="storage"> The attachment storage. </param>
-        /// <param name="storageName">The name of the <see cref="CFStorage"/></param>
+        /// <param name="storageName">The name of the <see cref="CFStorage" /></param>
         private void LoadAttachmentStorage(CFStorage storage, string storageName)
         {
             Logger.WriteToLog("Loading attachment storage");
@@ -1764,7 +1772,37 @@ public partial class Storage
 
                 default:
                     // Add attachment to attachment list
-                    _attachments.Add(attachment);
+                    if (attachment.FileName.ToLowerInvariant() == "winmail.dat")
+                    {
+                        try
+                        {
+                            Logger.WriteToLog("Found winmail.dat attachment, trying to get attachments from it");
+                            var stream = StreamHelpers.Manager.GetStream("Message.LoadAttachmentStorage", attachment.Data, 0, attachment.Data.Length);
+                            using var tnefReader = new TnefReader(stream);
+                            {
+                                var tnefAttachments = Part.ExtractAttachments(tnefReader);
+                                var count = tnefAttachments.Count;
+                                if (count > 0)
+                                {
+                                    Logger.WriteToLog($"Found {count} attachment{(count == 1 ? string.Empty : "s")}, removing winmail.dat and adding {(count == 1 ? "this attachment" : "these attachments")}");
+
+                                    foreach (var tnefAttachment in tnefAttachments)
+                                    {
+                                        var temp = new Attachment(tnefAttachment);
+                                        _attachments.Add(temp);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception exception)
+                        {
+                            Logger.WriteToLog($"Could not parse winmail.dat attachment, error: {ExceptionHelpers.GetInnerException(exception)}");
+                            _attachments.Add(attachment);
+                        }
+                    }
+                    else
+                        _attachments.Add(attachment);
                     break;
             }
 
@@ -1774,20 +1812,23 @@ public partial class Storage
 
         #region DeleteAttachment
         /// <summary>
-        /// Removes the given <paramref name="attachment"/> from the <see cref="Storage.Message"/> object.
+        ///     Removes the given <paramref name="attachment"/> from the <see cref="Storage.Message"/> object.
         /// </summary>
         /// <example>
         ///     message.DeleteAttachment(message.Attachments[0]);
         /// </example>
         /// <param name="attachment"></param>
-        /// <exception cref="MRCannotRemoveAttachment">Raised when it is not possible to remove the <see cref="Storage.Attachment"/> or <see cref="Storage.Message"/> from
-        /// the <see cref="Storage.Message"/></exception>
+        /// <exception cref="MRCannotRemoveAttachment">
+        ///     Raised when it is not possible to remove the <see cref="Storage.Attachment"/> or <see cref="Storage.Message"/>
+        ///     from
+        ///     the <see cref="Storage.Message"/></exception>
         public void DeleteAttachment(object attachment)
         {
             Logger.WriteToLog("Deleting attachment");
 
             if (FileAccess == FileAccess.Read)
-                throw new MRCannotRemoveAttachment("Cannot remove attachments when the file is not opened in Write or ReadWrite mode");
+                throw new MRCannotRemoveAttachment(
+                    "Cannot remove attachments when the file is not opened in Write or ReadWrite mode");
 
             foreach (var attachmentObject in _attachments)
             {
@@ -1813,7 +1854,7 @@ public partial class Storage
                 }
 
                 _attachments.Remove(attachment);
-                TopParent._rootStorage.Delete(storageName);
+                _rootStorage.Delete(storageName);
                 _attachmentDeleted = true;
                 break;
             }
@@ -1824,7 +1865,7 @@ public partial class Storage
 
         #region Copy
         /// <summary>
-        /// Copies the given <paramref name="source"/> to the given <paramref name="destination"/>
+        ///     Copies the given <paramref name="source" /> to the given <paramref name="destination" />
         /// </summary>
         /// <param name="source"></param>
         /// <param name="destination"></param>
@@ -1848,7 +1889,6 @@ public partial class Storage
                     var destinationStream = destination.AddStream(action.Name);
                     if (sourceStream != null) destinationStream.SetData(sourceStream.GetData());
                 }
-
             }, false);
 
             Logger.WriteToLog("Storage copied");
@@ -1857,7 +1897,7 @@ public partial class Storage
 
         #region Save
         /// <summary>
-        /// Saves this <see cref="Storage.Message" /> to the specified <paramref name="fileName"/>
+        ///     Saves this <see cref="Storage.Message" /> to the specified <paramref name="fileName" />
         /// </summary>
         /// <param name="fileName"> Name of the file. </param>
         public void Save(string fileName)
@@ -1865,13 +1905,15 @@ public partial class Storage
             Logger.WriteToLog($"Saving message to file '{fileName}'");
 
             using (var saveFileStream = File.Open(fileName, FileMode.Create, FileAccess.ReadWrite))
+            {
                 Save(saveFileStream);
+            }
 
             Logger.WriteToLog("Message saved");
         }
 
         /// <summary>
-        /// Saves this <see cref="Storage.Message"/> to the specified <paramref name="stream"/>
+        ///     Saves this <see cref="Storage.Message" /> to the specified <paramref name="stream" />
         /// </summary>
         /// <param name="stream"> The stream to save to. </param>
         public void Save(Stream stream)
@@ -1889,11 +1931,14 @@ public partial class Storage
                     compoundFile.Close();
                 }
                 else
+                {
                     _compoundFile.Save(stream);
+                }
             }
             else
             {
                 var compoundFile = new CompoundFile();
+                compoundFile.RootStorage.CLSID = Guid.Parse("00020D0B-0000-0000-C000-000000000046");
                 var sourceNameIdStorage = TopParent._rootStorage.GetStorage(MapiTags.NameIdStorage);
                 var rootStorage = compoundFile.RootStorage;
                 var destinationNameIdStorage = rootStorage.AddStorage(MapiTags.NameIdStorage);
@@ -1918,8 +1963,8 @@ public partial class Storage
 
         #region SetEmailSenderAndRepresentingSender
         /// <summary>
-        /// Gets the <see cref="Sender"/> and <see cref="SenderRepresenting"/> from the <see cref="Storage.Message"/>
-        /// object and sets the <see cref="Storage.Message.Sender"/> and <see cref="Storage.Message.SenderRepresenting"/>
+        ///     Gets the <see cref="Sender"/> and <see cref="SenderRepresenting"/> from the <see cref="Storage.Message"/>
+        ///     object and sets the <see cref="Storage.Message.Sender"/> and <see cref="Storage.Message.SenderRepresenting"/>
         /// </summary>
         private void SetEmailSenderAndRepresentingSender()
         {
@@ -1998,6 +2043,7 @@ public partial class Storage
                 var parts = tempDisplayName.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length > 0)
                 {
+                    // ReSharper disable once UseIndexFromEndExpression
                     var lastPart = parts[parts.Length - 1];
                     tempDisplayName = lastPart.Contains("=") ? lastPart.Split('=')[1] : lastPart;
                 }
@@ -2030,7 +2076,6 @@ public partial class Storage
             tempEmail = GetMapiPropertyString(MapiTags.PR_SENT_REPRESENTING_EMAIL_ADDRESS);
             tempEmail = EmailAddress.RemoveSingleQuotes(tempEmail);
             tempDisplayName = EmailAddress.RemoveSingleQuotes(GetMapiPropertyString(MapiTags.PR_SENT_REPRESENTING_NAME));
-
             email = tempEmail;
             displayName = tempDisplayName;
 
@@ -2063,8 +2108,8 @@ public partial class Storage
         
         #region GetEmailSender
         /// <summary>
-        /// Returns the E-mail sender address in RFC822 format, e.g. 
-        /// "Pan, P (Peter)" &lt;Peter.Pan@neverland.com&gt;
+        ///     Returns the E-mail sender address in RFC822 format, e.g. 
+        ///     "Pan, P (Peter)" &lt;Peter.Pan@neverland.com&gt;
         /// </summary>
         /// <returns></returns>
         public string GetEmailSenderRfc822Format()
@@ -2086,11 +2131,13 @@ public partial class Storage
         }
 
         /// <summary>
-        /// Returns the E-mail sender address in a human readable format
+        ///     Returns the E-mail sender address in a human readable format
         /// </summary>
         /// <param name="html">Set to true to return the E-mail address as an html string</param>
-        /// <param name="convertToHref">Set to true to convert the E-mail addresses to a hyperlink. 
-        /// Will be ignored when <paramref name="html"/> is set to false</param>
+        /// <param name="convertToHref">
+        ///     Set to true to convert the E-mail addresses to a hyperlink. 
+        ///     Will be ignored when <paramref name="html"/> is set to false
+        /// </param>
         /// <returns></returns>
         public string GetEmailSender(bool html, bool convertToHref)
         {
@@ -2167,8 +2214,8 @@ public partial class Storage
                 if (!string.IsNullOrEmpty(representingEmailAddress) && 
                     !string.IsNullOrEmpty(emailAddress) &&
                     !emailAddress.Equals(representingEmailAddress, StringComparison.InvariantCultureIgnoreCase))
-                {
                     // ##### Begin HDS
+                {
                     //output += " " + LanguageConsts.EmailOnBehalfOf + " <a href=\"mailto:" + representingEmailAddress +
                     //    "\">" +
                     //    (!string.IsNullOrEmpty(representingDisplayName)
@@ -2186,9 +2233,10 @@ public partial class Storage
                                     (!string.IsNullOrEmpty(representingDisplayName)
                                         ? representingDisplayName
                                         : representingEmailAddress) + "</a> ";
+
                     }
-                    // ##### End HDS
                 }
+                // ##### End HDS
             }
             else
             {
@@ -2228,16 +2276,15 @@ public partial class Storage
                     }
                 }
             }
-            
             return output;
         }
         #endregion
 
         #region GetEmailRecipients
         /// <summary>
-        /// Returns all the recipient for the given <paramref name="type"/>
+        ///     Returns all the recipient for the given <paramref name="type" />
         /// </summary>
-        /// <param name="type">The <see cref="RecipientType"/> to return</param>
+        /// <param name="type">The <see cref="RecipientType" /> to return</param>
         /// <returns></returns>
         private List<RecipientPlaceHolder> GetEmailRecipients(RecipientType type)
         {
@@ -2247,14 +2294,12 @@ public partial class Storage
 
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var recipient in Recipients)
-            {
                 // First we filter for the correct recipient type
                 if (recipient.Type == type)
-                    recipients.Add(new RecipientPlaceHolder(recipient.Email, recipient.DisplayName, recipient.AddressType));
-            }
+                    recipients.Add(new RecipientPlaceHolder(recipient.Email, recipient.DisplayName,
+                        recipient.AddressType));
 
             if (recipients.Count == 0 && Headers != null)
-            {
                 switch (type)
                 {
                     case RecipientType.To:
@@ -2278,14 +2323,13 @@ public partial class Storage
                                     bcc => new RecipientPlaceHolder(bcc.Address, bcc.DisplayName, string.Empty)));
                         break;
                 }
-            }
 
             return recipients;
         }
 
         /// <summary>
-        /// Returns the E-mail recipients in RFC822 format, e.g. 
-        /// "Pan, P (Peter)" &lt;Peter.Pan@neverland.com&gt;
+        ///     Returns the E-mail recipients in RFC822 format, e.g.
+        ///     "Pan, P (Peter)" &lt;Peter.Pan@neverland.com&gt;
         /// </summary>
         /// <param name="type">Selects the Recipient type to retrieve</param>
         /// <returns></returns>
@@ -2360,12 +2404,16 @@ public partial class Storage
         // ##### End HDS
 
         /// <summary>
-        /// Returns the E-mail recipients in a human readable format
+        ///     Returns the E-mail recipients in a human readable format
         /// </summary>
         /// <param name="type">Selects the Recipient type to retrieve</param>
         /// <param name="html">Set to true to return the E-mail address as an html string</param>
-        /// <param name="convertToHref">Set to true to convert the E-mail addresses to hyperlinks. 
-        /// Will be ignored when <param ref="html"/> is set to false</param>
+        /// <param name="convertToHref">
+        ///     Set to true to convert the E-mail addresses to hyperlinks. 
+        ///     Will be ignored when
+        ///     <param ref="html"/>
+        ///     is set to false
+        ///     </param>
         /// <returns></returns>
         public string GetEmailRecipients(RecipientType type,
             bool html,
@@ -2406,7 +2454,7 @@ public partial class Storage
                     output += "<a href=\"mailto:" + emailAddress + "\">" +
                     formattedAddress + "</a>";
                 else if (!UseDisplayNameAndEmailAddresses && convertToHref && html && !string.IsNullOrEmpty(emailAddress))
-                // ##### Begin HDS
+                // ##### End HDS
                     output += "<a href=\"mailto:" + emailAddress + "\">" +
                                 (!string.IsNullOrEmpty(displayName)
                                     ? displayName
@@ -2444,7 +2492,7 @@ public partial class Storage
 
         #region GetAttachmentNames
         /// <summary>
-        /// Returns the attachments names as a comma seperated string
+        ///     Returns the attachments names as a comma seperated string
         /// </summary>
         /// <returns></returns>
         public string GetAttachmentNames()
@@ -2454,20 +2502,19 @@ public partial class Storage
             var result = new List<string>();
 
             foreach (var attachment in Attachments)
-            {
-                // ReSharper disable once CanBeReplacedWithTryCastAndCheckForNull
-                if (attachment is Attachment)
+                switch (attachment)
                 {
-                    var attach = (Attachment)attachment;
-                    result.Add(attach.FileName);
+                    case Attachment attach:
+                    {
+                        result.Add(attach.FileName);
+                        break;
+                    }
+                    case Message message:
+                    {
+                        result.Add(message.FileName);
+                        break;
+                    }
                 }
-                // ReSharper disable once CanBeReplacedWithTryCastAndCheckForNull
-                else if (attachment is Message)
-                {
-                    var msg = (Message)attachment;
-                    result.Add(msg.FileName);
-                }
-            }
 
             return string.Join(", ", result);
         }
